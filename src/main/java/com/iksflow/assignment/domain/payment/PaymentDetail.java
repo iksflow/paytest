@@ -1,7 +1,9 @@
 package com.iksflow.assignment.domain.payment;
 
 import com.iksflow.assignment.domain.BaseTimeEntity;
+import com.iksflow.assignment.web.dto.PaymentResponseDto;
 import com.iksflow.assignment.web.dto.PaymentSaveRequestDto;
+import com.iksflow.assignment.web.dto.PaymentSaveResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +27,12 @@ public class PaymentDetail extends BaseTimeEntity {
     @Column(name = "payment_detail_aid", length = 20, nullable = false)
     private String aid;
 
+    @Column(name = "payment_detail_pay_aid", length = 20)
+    private String payAid;
+
+    @Column(name = "payment_detail_state", length = 10)
+    private String state;
+
     @Column(name = "payment_detail_paystring", length = 450, nullable = false)
     private String payString;
 
@@ -33,17 +41,14 @@ public class PaymentDetail extends BaseTimeEntity {
     private Payment payment;
 
     @Builder
-    public PaymentDetail(PaymentSaveRequestDto requestDto, Payment payment) {
+    public PaymentDetail(String payAid, String state, String encryptedCardInfo, String cardNumber, String expiryMonthYear, String cvcNumber,
+                         int installMonth, BigDecimal totalAmount, BigDecimal vatAmount, Payment payment) {
         this.aid = createUniqueId();
-        this.payString = createPayStringFromDto(requestDto);
+        this.payString = createPayStringFromDto(state, encryptedCardInfo, cardNumber, expiryMonthYear, cvcNumber, installMonth, totalAmount, vatAmount);
         this.payment = payment;
+        this.payAid = payAid;
+        this.state = state;
     }
-//    public PaymentDetail(String cardNumber, String expiryMonthYear, String cvcNumber, String installMonth,
-//                         BigDecimal totalAmount, BigDecimal vatAmount, Payment payment) {
-//        this.aid = createUniqueId();
-//        this.payString = createPayStringFromDto();
-//        this.payment = payment;
-//    }
 
     private String createUniqueId() {
         int random = Double.valueOf(Math.random() * 30).intValue();
@@ -55,34 +60,38 @@ public class PaymentDetail extends BaseTimeEntity {
         return uniqueId;
     }
 
-    public String createPayStringFromDto(PaymentSaveRequestDto requestDto) {
+    private String createPayStringFromDto(String state, String encryptedCardInfo, String cardNumber, String expiryMonthYear, String cvcNumber,
+                                          int installMonth, BigDecimal totalAmount, BigDecimal vatAmount) {
+
         StringBuffer payStrBuffer = new StringBuffer();
         int dataMaxLength = 450;
         String dataLengthHeader = String.format("%4s", dataMaxLength-4);
-        String dataTypeHeader = String.format("%-10s", requestDto.getState());
-        String aidHeader = this.getAid();
-        String cardNumber = String.format("%-20s", requestDto.getCardNumber());
-        String installMonth = String.format("%02d", requestDto.getInstallMonth());
-        String expiryMonthYear = requestDto.getExpiryMonthYear();
-        String cvcNumber = requestDto.getCvcNumber();
-        String totalAmount = String.format("%10s", requestDto.getTotalAmount().toString());
-        String vatAmount = String.format("%10s", requestDto.getVatAmount().toString()).replace(" ", "0");
-        String tidHeader = (requestDto.getState().equals("PAYMENT")) ? String.format("%20s", "") : String.format("%20s", payment.getTid());
-        String encryptCardInfo = String.format("%300s", requestDto.getEncryptedCardInfo());
+        String dataTypeHeader = String.format("%-10s", state);
+        String aidHeaderHeader = this.aid;
+        String cardNumberPart = String.format("%-20s", cardNumber);
+        String installMonthPart = String.format("%02d", installMonth);
+        String expiryMonthYearPart = expiryMonthYear;
+        String cvcNumberPart = cvcNumber;
+        String totalAmountPart = String.format("%10s", totalAmount.toString());
+        String vatAmountPart = (vatAmount != null) ? String.format("%10s", vatAmount.toString()).replace(" ", "0")
+                : String.format("%10s", totalAmount.divide(new BigDecimal("11"), 0, BigDecimal.ROUND_HALF_UP).toString()).replace(" ", "0");
+        String payAidPart = (state.equals("PAYMENT")) ? String.format("%20s", "") : String.format("%20s", this.payAid);
+        String encryptCardInfo = String.format("%300s", encryptedCardInfo);
         String extraSpace = String.format("%47s", "");
         payStrBuffer.append(dataLengthHeader)
                 .append(dataTypeHeader)
-                .append(aidHeader)
-                .append(cardNumber)
-                .append(installMonth)
-                .append(expiryMonthYear)
-                .append(cvcNumber)
-                .append(totalAmount)
-                .append(vatAmount)
-                .append(tidHeader)
+                .append(aidHeaderHeader)
+                .append(cardNumberPart)
+                .append(installMonthPart)
+                .append(expiryMonthYearPart)
+                .append(cvcNumberPart)
+                .append(totalAmountPart)
+                .append(vatAmountPart)
+                .append(payAidPart)
                 .append(encryptCardInfo)
                 .append(extraSpace);
 
         return payStrBuffer.toString();
     }
+
 }

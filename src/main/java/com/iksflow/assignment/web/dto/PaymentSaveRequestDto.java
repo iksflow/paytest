@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class PaymentSaveRequestDto {
 
-    private String state;
+    private String state = "PAYMENT";
     private String cardNumber;
     private String expiryMonthYear;
     private String cvcNumber;
@@ -26,7 +26,7 @@ public class PaymentSaveRequestDto {
     @Builder
     public PaymentSaveRequestDto(String state, String cardNumber, String expiryMonthYear, String cvcNumber,
                                  int installMonth, BigDecimal totalAmount, BigDecimal vatAmount) {
-        this.state = "PAYMENT";
+        this.state = state;
         this.cardNumber = cardNumber;
         this.expiryMonthYear = expiryMonthYear;
         this.cvcNumber = cvcNumber;
@@ -41,12 +41,20 @@ public class PaymentSaveRequestDto {
 
     public Payment toEntity() {
         return Payment.builder()
+                .lastState(state)
                 .build();
     }
 
     public PaymentDetail toEntity(Payment payment) {
         return PaymentDetail.builder()
-                .requestDto(this)
+                .state(state)
+                .encryptedCardInfo(encryptedCardInfo)
+                .cardNumber(cardNumber)
+                .expiryMonthYear(expiryMonthYear)
+                .cvcNumber(cvcNumber)
+                .installMonth(installMonth)
+                .totalAmount(totalAmount)
+                .vatAmount(vatAmount)
                 .payment(payment)
                 .build();
     }

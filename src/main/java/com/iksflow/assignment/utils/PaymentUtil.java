@@ -20,6 +20,8 @@ public class PaymentUtil {
         return jasyptConfig.stringEncryptor().encrypt(plainText);
     }
 
+    public String decrypt(String cipherText) { return jasyptConfig.stringEncryptor().decrypt(cipherText); }
+
     public String createUniqueId() {
         int random = Double.valueOf(Math.random() * 30).intValue();
         String uuid = UUID.randomUUID().toString().replace("-", "");
@@ -28,35 +30,5 @@ public class PaymentUtil {
         String uniqueId = timeId + smallUuid;
 
         return uniqueId;
-    }
-
-    public String createPayStringFromDto(PaymentSaveRequestDto requestDto) {
-        String formatString = "TESTFORMATSTRING";
-
-        return formatString;
-    }
-
-    public PaymentResponseDto parsePayStringToDto(String payFormatted) {
-        String tid = "TIDTESNUMBER";
-        String aid = "AIDTESTNUMER";
-        String cardNumber = "1234567890123456";
-        String expiryMonthYear = "0620";
-        String cvcNumber = "999";
-        String installMonth = "00";
-        BigDecimal totalAmount = BigDecimal.valueOf(100000);
-        BigDecimal vatAmount = BigDecimal.ZERO;
-
-        PaymentResponseDto responseDto = PaymentResponseDto.builder()
-                .tid(tid)
-                .aid(aid)
-                .cardNumber(cardNumber)
-                .expiryMonthYear(expiryMonthYear)
-                .cvcNumber(cvcNumber)
-                .installMonth(installMonth)
-                .totalAmount(totalAmount)
-                .vatAmount(vatAmount)
-                .build();
-
-        return responseDto;
     }
 }

@@ -28,9 +28,13 @@ public class Payment extends BaseTimeEntity {
     @Column(name = "payment_tid", length = 20)
     private String tid;
 
+    @Column(name = "payment_last_state", length = 10)
+    private String lastState;
+
     @Builder
-    public Payment(String tid) {
+    public Payment(String tid, String lastState) {
         this.tid = createUniqueId();
+        this.lastState = lastState;
     }
 
     private String createUniqueId() {

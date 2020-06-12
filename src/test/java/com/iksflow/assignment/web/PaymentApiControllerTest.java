@@ -1,8 +1,10 @@
 package com.iksflow.assignment.web;
 
 import com.iksflow.assignment.domain.payment.Payment;
+import com.iksflow.assignment.domain.payment.PaymentDetail;
 import com.iksflow.assignment.domain.payment.PaymentDetailRepository;
 import com.iksflow.assignment.domain.payment.PaymentRepository;
+import com.iksflow.assignment.web.dto.PaymentResponseDto;
 import com.iksflow.assignment.web.dto.PaymentSaveRequestDto;
 import org.junit.After;
 import org.junit.Test;
@@ -34,7 +36,7 @@ public class PaymentApiControllerTest {
     private PaymentRepository paymentRepository;
 
     @Autowired
-    PaymentDetailRepository paymentDetailRepository;
+    private PaymentDetailRepository paymentDetailRepository;
 
     @After
     public void tearDown() throws Exception {
@@ -64,18 +66,26 @@ public class PaymentApiControllerTest {
         String url = "http://localhost:" + port + "/api/v1/payment";
 
         // when
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestDto, String.class);
+        ResponseEntity<PaymentResponseDto> responseEntity = restTemplate.postForEntity(url, requestDto, PaymentResponseDto.class);
 
         // then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-//        assertThat(responseEntity.getBody().length()).isEqualTo(20);
+        assertThat(responseEntity.getBody().getTid().length()).isEqualTo(20);
 
-        List<Payment> all = paymentRepository.findAll();
-        Payment payment = all.get(0);
-        assertThat(payment.getTid()).isEqualTo(requestDto.toEntity().getTid());
-//        assertThat(payment.getContent()).isEqualTo(content);
+        List<PaymentDetail> all = paymentDetailRepository.findAll();
+        PaymentDetail paymentDetail = all.get(0);
+
+        // response>required 관리번호(aid) : payment_detail.aid와 response.aid 비교
+        assertThat(paymentDetail.getAid()).isEqualTo(responseEntity.getBody().getAid());
     }
 
 
-
+    @Test
+    public void temp() {
+//        System.out.println(new BigDecimal("100000").divide(new BigDecimal("11")).toString());
+        System.out.println("<<TEST START>>");
+        System.out.println(new BigDecimal("11000"));
+        System.out.println(new BigDecimal("11000").divide(new BigDecimal("11"), 0, BigDecimal.ROUND_HALF_UP));
+        System.out.println("<<TEST END>>");
+    }
 }
